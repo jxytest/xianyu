@@ -44,13 +44,13 @@ let s3 = string.$new('r_117');
 
 
 rpc.exports = {
-    getsign: async function(keyword) {
+    getsign: function(data, t) {
         Java.perform(function() {
             console.log("get_sign");
             console.log(s3);
-            // 每次调用，更新keyword
-            hashPut(h1, DATA, '{"activeSearch":false,"bizFrom":"home","disableHierarchicalSort":0,"forceUseInputKeyword":false,"forceUseTppRepair":false,"fromFilter":false,"fromKits":false,"fromLeaf":false,"fromShade":false,"fromSuggest":false,"keyword":"' + keyword + '","pageNumber":1,"resultListLastIndex":0,"rowsPerPage":10,"searchReqFromActivatePagePart":"historyItem","searchReqFromPage":"xyHome","searchTabType":"SEARCH_TAB_MAIN","shadeBucketNum":-1,"suggestBucketNum":37}');
-            var t = Math.floor(new Date().getTime() / 1000).toString();
+            // 每次调用，更新data
+            hashPut(h1, DATA, data);
+            // var t = Math.floor(new Date().getTime() / 1000).toString();
             // 每次调用 getsign 函数时，都会更新 t 的值
             hashPut(h1, T, t);
             Java.choose("mtopsdk.security.InnerSignImpl", {
@@ -58,7 +58,7 @@ rpc.exports = {
                     console.log("Found instance: " + instance);
                     var result = instance.getUnifiedSign(h1, h2, s1, s2, true, s3);
                     console.log(result);
-                    send({ "sign": result.toString(), "keyword": keyword, "t": t });
+                    send({ "sign": result.toString()});
                     // 必须返回stop，否则会遍历所有的实例
                     return "stop";
                 },
