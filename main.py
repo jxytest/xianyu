@@ -1,7 +1,9 @@
 import asyncio
 import json
 import threading
+import time
 
+from pusher import ding_push
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from loguru import logger
 from api import Api
@@ -63,6 +65,11 @@ async def task(keywords):
                 data = await api.search(keyword)
                 # 存入redis
                 for item in data:
+                    if not await redis.exists(item.get("itemId")) and 4000 > int(item.get("price")) > 1000 \
+                            and "回收" not in item.get("title") and "求购" not in item.get("title")\
+                            and time.mktime(time.strptime(item.get("publish_time"), "%Y-%m-%d %H:%M:%S")) > \
+                            time.time() - 3600 * 24 * 3:
+                        await ding_push(item)
                     await redis.set(item.get("itemId"), json.dumps(item))
                 await asyncio.sleep(10)
         except Exception as e:
@@ -90,3 +97,5 @@ if __name__ == '__main__':
     asyncio.run_coroutine_threadsafe(task(['dell r730']), new_loop)  # 在新的线程中启动事件循环
     # 主线程启动fastapi
     uvicorn.run(app)
+    # 2022-12-20 16:00:00格式转成时间戳
+    # print(time.mktime(time.strptime("2022-12-20 16:00:00", "%Y-%m-%d %H:%M:%S")))
