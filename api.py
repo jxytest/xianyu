@@ -45,11 +45,12 @@ class Api:
         data = {
             'data': json.dumps(data),
         }
-        logger.info(f"请求参数: {data}")
-        logger.info(f"请求头: {self.headers}")
+        # logger.info(f"请求参数: {data}")
+        # logger.info(f"请求头: {self.headers}")
         async with aiohttp.request("POST", self.search_url, headers=self.headers, data=data) as resp:
             resp = await resp.json()
-            logger.info(f"search请求结果: {resp}")
+            logger.info(f"search请求完成")
+            # logger.info(f"search请求结果: {resp}")
             result = self.parser_search_result(resp)
             logger.info(f"search解析结果: {result}")
             return result
@@ -70,29 +71,33 @@ class Api:
             res = response.get("data").get("resultList")
             result = []
             for item in res:
-                main = item.get("data").get("item").get("main")
-                click_param = main.get("clickParam")
-                ex_content = main.get("exContent")
-                target_url = main.get("targetUrl")
-                publish_time = click_param.get("publishTime")
-                # 时间戳转换
-                publish_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(publish_time / 1000))
-                title = ex_content.get("title")
-                item_id = ex_content.get("itemId")
-                pic_url = ex_content.get("picUrl")
-                user_nick = ex_content.get('detailParams').get("userNick")
-                price = ex_content.get('detailParams').get("soldPrice")
-                # 组装数据
-                data = {
-                    "itemId": item_id,
-                    "userNick": user_nick,
-                    "price": price,
-                    "title": title,
-                    "pic_url": pic_url,
-                    "publish_time": publish_time,
-                }
-                result.append(data)
+                try:
+                    main = item.get("data").get("item").get("main")
+                    click_param = main.get("clickParam")
+                    ex_content = main.get("exContent")
+                    target_url = main.get("targetUrl")
+                    publish_time = click_param.get('args').get("publishTime")
+                    # 时间戳转换
+                    publish_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(int(publish_time) / 1000))
+                    title = ex_content.get("title")
+                    item_id = ex_content.get("itemId")
+                    pic_url = ex_content.get("picUrl")
+                    user_nick = ex_content.get('detailParams').get("userNick")
+                    price = ex_content.get('detailParams').get("soldPrice")
+                    # 组装数据
+                    data = {
+                        "itemId": item_id,
+                        "userNick": user_nick,
+                        "price": price,
+                        "title": title,
+                        "pic_url": pic_url,
+                        "publish_time": publish_time,
+                    }
+                    result.append(data)
+                except Exception as e:
+                    logger.error(f"解析商品数据失败: {e}")
             return result
         except Exception as e:
+            logger.exception(e)
             logger.error(f"解析search结果失败: {e}")
             return []
