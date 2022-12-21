@@ -12,13 +12,10 @@ from core.task.task_manage import XianYuTask
 router = APIRouter()
 
 # 白名单过滤器
-print(11111111111111111111111)
 whitelist = FilterXY('whitelist.txt')
 # 黑名单过滤器
 blacklist = FilterXY('blacklist.txt')
-print(222222222222222222222)
 xian_yu_task = XianYuTask()
-print(33333333333333333333333333333)
 
 
 class TaskInfo(BaseModel):
@@ -79,4 +76,33 @@ async def tasks(task_info: TaskInfo):
     elif task_info.type == 3:
         # 恢复任务
         xian_yu_task.resume()
+    return {"code": 200, "msg": "操作成功"}
+
+
+@router.post("/setFilter")
+async def setFilter(type_filter: int = Query(default=0, description='0:添加白名单 1:添加黑名单 2:从白名单删除 3:从黑名单删除 4:查看白名单列表 '
+                                                                    '5:查看黑名单列表', ge=0, le=4),
+                    keywords: List[str] = Query(default=None, description='关键字列表')):
+    if type_filter == 0:
+        # 添加白名单
+        for keyword in keywords:
+            whitelist.add_filter(keyword)
+    elif type_filter == 1:
+        # 添加黑名单
+        for keyword in keywords:
+            blacklist.add_filter(keyword)
+    elif type_filter == 2:
+        # 从白名单删除
+        for keyword in keywords:
+            whitelist.del_filter(keyword)
+    elif type_filter == 3:
+        # 从黑名单删除
+        for keyword in keywords:
+            blacklist.del_filter(keyword)
+    elif type_filter == 4:
+        # 查看白名单列表
+        return {"code": 200, "msg": "获取成功", "data": whitelist.filter_list()}
+    elif type_filter == 5:
+        # 查看黑名单列表
+        return {"code": 200, "msg": "获取成功", "data": blacklist.filter_list()}
     return {"code": 200, "msg": "操作成功"}
