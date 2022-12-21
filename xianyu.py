@@ -1,4 +1,5 @@
 import json
+from urllib.parse import quote
 
 from loguru import logger
 import frida
@@ -24,14 +25,16 @@ class XianYu:
             hook_code = f.read()
         return hook_code
 
-    def get_sign(self, data: dict, t):
+    def get_sign(self, data: str, headers: dict, t):
         """
         获取sign
+        :param headers: 请求头
         :param data: 请求参数
         :param t: 时间戳
         :return:
         """
-        self.script.exports.getSign(json.dumps(data), t)
+        data = quote(data)  # 对请求参数进行编码
+        self.script.exports.getSign(data, json.dumps(headers), t)
         return self.sign
 
     def on_message(self, message, data):

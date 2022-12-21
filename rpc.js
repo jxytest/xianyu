@@ -42,7 +42,7 @@ let s3 = string.$new('r_31');
 
 
 rpc.exports = {
-    getsign: function(data, t) {
+    getsign: function(data, headers, t) {
         Java.perform(function() {
             console.log("get_sign");
             console.log(s3);
@@ -51,9 +51,12 @@ rpc.exports = {
             // var t = Math.floor(new Date().getTime() / 1000).toString();
             // 每次调用 getsign 函数时，都会更新 t 的值
             hashPut(h1, T, t);
-            console.log(data);
-            console.log(t);
-            console.log("========================================");
+            // 解析headers
+            let headers_obj = JSON.parse(headers);
+            hashPut(h1, UTDID, headers_obj['x-utdid']);
+            hashPut(h1, DEVICE_ID, headers_obj['x-devid']);
+            console.log("===================================");
+            // 调用 com.taobao.wireless.security.sdk.SecurityGuardManagerImpl.getStaticDataSign 方法
             Java.choose("mtopsdk.security.InnerSignImpl", {
                 onMatch: function (instance) {
                     console.log("Found instance: " + instance);
