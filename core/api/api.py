@@ -1,11 +1,9 @@
-import asyncio
 import json
+import os
 import time
-from urllib.parse import quote
-
 from aiohttp import TCPConnector
 from loguru import logger
-from xianyu import XianYu
+from core.frida.xianyu import XianYu
 import aiohttp
 
 
@@ -25,11 +23,14 @@ def random_str(random_length=8):
 class Api:
     def __init__(self):
         self.search_url = "https://g-acs.m.goofish.com/gw/mtop.taobao.idlemtopsearch.search/1.0/"
-        self.xian_yu = XianYu("rpc.js")
+        js_path = os.path.join(os.path.dirname(__file__), "../js/rpc.js")
+        self.xian_yu = XianYu(js_path)
         self.headers = {
             "Content-Type": "application/x-www-form-urlencoded",
             "User-Agent": "MTOPSDK%2F3.1.1.7+%28Android%3B12%3BXiaomi%3BRedmi+K30+Pro+Zoom+Edition%29",
             "x-pv": '6.3',
+            # TODO 登录后获取
+            "x-sid": '14da454c9c1d9e0ca034d26c95e8dbd3',
             "x-bx-version": '6.5.88',
             "x-ttid": '231200@fleamarket_android_7.8.40',
             "x-app-ver": '7.8.40',
@@ -56,14 +57,34 @@ class Api:
         })
 
     async def search(self, keyword):
-        data = {'activeSearch': False, 'bizFrom': 'home',
-                'clientModifiedCpvNavigatorJson': {'tabList': [], 'fromClient': False}, 'disableHierarchicalSort': 0,
-                'forceUseInputKeyword': False, 'forceUseTppRepair': False, 'fromCombo': 'Sort', 'fromFilter': True,
-                'fromKits': False, 'fromLeaf': False, 'fromShade': False, 'fromSuggest': False, 'keyword': keyword,
-                'pageNumber': 1, 'propValueStr': {'searchFilter': 'publishDays:3'}, 'resultListLastIndex': 0,
-                'rowsPerPage': 10, 'searchReqFromActivatePagePart': 'searchButton', 'searchReqFromPage': 'xyHome',
-                'searchTabType': 'SEARCH_TAB_MAIN', 'shadeBucketNum': -1, 'sortField': 'create', 'sortValue': 'desc',
-                'suggestBucketNum': 37}
+        data = {
+            'activeSearch': False,
+            'bizFrom': 'home',
+            'clientModifiedCpvNavigatorJson': {'tabList': [], 'fromClient': False},
+            'disableHierarchicalSort': 0,
+            'forceUseInputKeyword': False,
+            'forceUseTppRepair': False,
+            'fromCombo': 'Sort',
+            'fromFilter': True,
+            'fromKits': False,
+            'fromLeaf': False,
+            'fromShade': False,
+            'fromSuggest': False,
+            'keyword': keyword,
+            'pageNumber': 1,
+            'propValueStr': {'searchFilter': 'publishDays:3'},
+            'resultListLastIndex': 0,
+            'rowsPerPage': 10,
+            # 'searchReqFromActivatePagePart': 'searchButton',
+            'searchReqFromActivatePagePart': 'historyItem',
+            'searchReqFromPage': 'xyHome',
+            'searchTabType': 'SEARCH_TAB_MAIN',
+            'shadeBucketNum': -1,
+            'sortField': 'create',
+            'sortValue': 'desc',
+            # 'suggestBucketNum': 37,
+            'suggestBucketNum': 33
+        }
         data = json.dumps(data)
         self.update_headers(data)
         data = {

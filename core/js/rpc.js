@@ -7,6 +7,7 @@ const API = 'api';
 const LAT = 'lat';
 const LNG = 'lng';
 const UTDID = 'utdid';
+const SID = 'sid';  // 登录后获取
 const EXTDATA = 'extdata';
 const TTID = 'ttid';
 const T = 't';
@@ -54,6 +55,7 @@ rpc.exports = {
             // 解析headers
             let headers_obj = JSON.parse(headers);
             hashPut(h1, UTDID, headers_obj['x-utdid']);
+            hashPut(h1, SID, headers_obj['x-sid']);
             hashPut(h1, DEVICE_ID, headers_obj['x-devid']);
             console.log("===================================");
             // 调用 com.taobao.wireless.security.sdk.SecurityGuardManagerImpl.getStaticDataSign 方法
