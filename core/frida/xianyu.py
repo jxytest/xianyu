@@ -33,7 +33,7 @@ class XianYu:
         :param t: 时间戳
         :return:
         """
-        data = quote(data)  # 对请求参数进行编码
+        # data = quote(data)  # 对请求参数进行编码
         self.script.exports.getSign(data, json.dumps(headers), t)
         return self.sign
 

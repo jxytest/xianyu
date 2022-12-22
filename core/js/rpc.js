@@ -19,6 +19,7 @@ const PAGE_NAME = 'pageName';
 const hashMap = Java.use('java.util.HashMap');
 const string = Java.use('java.lang.String');
 
+
 function hashPut(hashMap, key, value) {
     hashMap.put(string.$new(key), string.$new(value));
 }
@@ -26,22 +27,17 @@ function hashPut(hashMap, key, value) {
 // 创建 h1 和 h2 两个 HashMap 对象
 let h1 = hashMap.$new();
 let h2 = hashMap.$new();
-hashPut(h1, DEVICE_ID, "Aqt_PBohWdwAsGzXiXY7HF2ViwjRMA05SRnwqIvPFZDx");
 hashPut(h1, X_FEATURES, "27");
-hashPut(h1, APP_KEY, "21407387");
 hashPut(h1, API, "mtop.taobao.idlemtopsearch.search");
 hashPut(h1, LAT, "0");
 hashPut(h1, LNG, "0");
-hashPut(h1, UTDID, "X%2FbTHVUvlf4DAAubT0WJXpoD");
-hashPut(h1, EXTDATA, 'openappkey%3DDEFAULT_AUTH')
-hashPut(h1, TTID, "231200@fleamarket_android_7.8.40");
 hashPut(h1, V, "1.0");
 hashPut(h2, PAGE_ID, "");
 hashPut(h2, PAGE_NAME, "");
-hashPut(h2, UID, "2143549739");
-let s1 = string.$new("21407387");
+
 let s2 = string.$new();
 let s3 = string.$new('r_106');
+
 
 
 rpc.exports = {
@@ -58,7 +54,14 @@ rpc.exports = {
             let headers_obj = JSON.parse(headers);
             hashPut(h1, UTDID, headers_obj['x-utdid']);
             hashPut(h1, SID, headers_obj['x-sid']);
+            hashPut(h1, UID, headers_obj['x-uid']);
             hashPut(h1, DEVICE_ID, headers_obj['x-devid']);
+            hashPut(h1, EXTDATA, headers_obj['x-extdata']);
+            hashPut(h1, TTID, headers_obj['x-ttid']);
+            hashPut(h1, APP_KEY, headers_obj['x-appkey']);
+
+            let s1 = string.$new(headers_obj['x-appkey']);
+
             console.log("===================================");
             // 调用 com.taobao.wireless.security.sdk.SecurityGuardManagerImpl.getStaticDataSign 方法
             Java.choose("mtopsdk.security.InnerSignImpl", {

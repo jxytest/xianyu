@@ -28,19 +28,51 @@ class Api:
         self.search_url = "https://g-acs.m.goofish.com/gw/mtop.taobao.idlemtopsearch.search/1.0/"
         js_path = os.path.join(os.path.dirname(__file__), "../js/rpc.js")
         self.xian_yu = XianYu(js_path)
+        # self.headers = {
+        #     "Content-Type": "application/x-www-form-urlencoded",
+        #     "User-Agent": quote("MTOPSDK%2F3.1.1.7+%28Android%3B12%3BXiaomi%3BRedmi+K30+Pro+Zoom+Edition%29"),
+        #     "x-pv": '6.3',
+        #     # TODO 登录后获取
+        #     "x-sid": '14da454c9c1d9e0ca034d26c95e8dbd3',
+        #     "x-bx-version": '6.5.88',
+        #     "x-ttid": quote('231200@fleamarket_android_7.8.40'),
+        #     "x-app-ver": '7.8.40',
+        #     "x-utdid": quote(random_str(24)),
+        #     "x-appkey": "21407387",
+        #     "x-devid": quote(random_str(44)),
+        #     "x-features": "27"
+        # }
         self.headers = {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "User-Agent": quote("MTOPSDK%2F3.1.1.7+%28Android%3B12%3BXiaomi%3BRedmi+K30+Pro+Zoom+Edition%29"),
-            "x-pv": '6.3',
-            # TODO 登录后获取
-            "x-sid": '14da454c9c1d9e0ca034d26c95e8dbd3',
-            "x-bx-version": '6.5.88',
-            "x-ttid": quote('231200@fleamarket_android_7.8.40'),
-            "x-app-ver": '7.8.40',
-            "x-utdid": quote(random_str(24)),
-            "x-appkey": "21407387",
-            "x-devid": quote(random_str(44)),
-            "x-features": "27"
+            'umid': 'B94BhVxLPIjTTAKFMw8u0M5OFG+AuwhE',
+            'x-sid': '14da454c9c1d9e0ca034d26c95e8dbd3',
+            'x-uid': '2143549739',
+            'x-nettype': 'WIFI',
+            'x-pv': '6.3',
+            'x-nq': 'WIFI',
+            'EagleEye-UserData': 'spm-cnt=a2170.8011571.0.0&spm-url=a2170.unknown.0.0',
+            'first_open': '0',
+            'x-features': '27',
+            'x-app-conf-v': '0',
+            'content-type': 'application/x-www-form-urlencoded;charset=UTF-8',
+            # 'Content-Length': '640',
+            'oaid': 'ef4d6747261738fd',
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+            # 'Cookie': 'unb=2143549739; munb=2143549739; _nk_=%5Cu5BDE%5Cu661F%5Cu6C89; cookie2=14da454c9c1d9e0ca034d26c95e8dbd3; csg=2e46b480; t=adc81779bfa70b35310aa7c0c8890a3d; _tb_token_=5eea7913e3353; sgcookie=W100EBE%2FgJyMO%2Fh1nUumc1mxY78wzpOFqK4Psj5J97MelFO0hi%2BbuuHHWzjposSC1jvyZimvx8vLCQcW932dGWnTFfoC4%2B8pCgxQ3IA1TXieYvc%3D',
+            'x-bx-version': '6.5.88',
+            'f-refer': 'mtop',
+            'x-extdata': 'openappkey%3DDEFAULT_AUTH',
+            'x-ttid': '231200%40fleamarket_android_7.8.40',
+            'x-app-ver': '7.8.40',
+            'x-c-traceid': f'X%2F{random_str(22)}{int(time.time() * 1000)}0230112176',
+            'x-location': '0%2C0',
+            'a-orange-q': 'appKey=21407387&appVersion=7.8.40&clientAppIndexVersion=1120221221105400982&clientVersionIndexVersion=0',
+            'x-utdid': quote(random_str(24)),
+            'x-appkey': '21407387',
+            'x-devid': quote(random_str(44)),
+            'user-agent': 'MTOPSDK%2F3.1.1.7+%28Android%3B12%3BXiaomi%3BRedmi+K30+Pro+Zoom+Edition%29',
+            'Host': 'g-acs.m.goofish.com',
+            # 'Accept-Encoding': 'gzip',
+            'Connection': 'Keep-Alive',
         }
         self.proxy = None
         # 不能使用代理
@@ -57,6 +89,7 @@ class Api:
             "x-mini-wua": quote(sign.get('x-mini-wua')),
             "x-sgext": quote(sign.get('x-sgext')),
             "x-sign": quote(sign.get('x-sign')),
+            "x-mut": quote(sign.get('x-umt')),
         })
 
     async def search(self, keyword):
@@ -93,7 +126,7 @@ class Api:
         data = data.replace(" ", "").replace("\n", "")
         data = 'data=' + quote(data)
         self.update_headers(data)
-        logger.info(f"请求参数: {data}")
+        # logger.info(f"请求参数: {data}")
         # logger.info(f"请求头: {self.headers}")
         # async with aiohttp.ClientSession(
         #         connector=TCPConnector(ssl=False),
@@ -107,7 +140,7 @@ class Api:
         #         logger.info(f"search解析结果: {result}")
         #         return result
 
-        async with aiohttp.request('POST', self.search_url, headers=self.headers, data=data, proxy=self.proxy) as resp:
+        async with aiohttp.request('POST', self.search_url, headers=self.headers, data=data) as resp:
             resp = await resp.json()
             logger.info(f"search请求完成")
             # logger.info(f"search请求结果: {resp}")
