@@ -10,6 +10,7 @@ const UTDID = 'utdid';
 const SID = 'sid';  // 登录后获取
 const EXTDATA = 'extdata';
 const TTID = 'ttid';
+const UID = 'uid';
 const T = 't';
 const V = 'v';
 const PAGE_ID = 'pageId';
@@ -31,15 +32,16 @@ hashPut(h1, APP_KEY, "21407387");
 hashPut(h1, API, "mtop.taobao.idlemtopsearch.search");
 hashPut(h1, LAT, "0");
 hashPut(h1, LNG, "0");
-hashPut(h1, UTDID, "X/bTHVUvlf4DAAubT0WJXpoD");
-hashPut(h1, EXTDATA, 'openappkey=DEFAULT_AUTH')
+hashPut(h1, UTDID, "X%2FbTHVUvlf4DAAubT0WJXpoD");
+hashPut(h1, EXTDATA, 'openappkey%3DDEFAULT_AUTH')
 hashPut(h1, TTID, "231200@fleamarket_android_7.8.40");
 hashPut(h1, V, "1.0");
 hashPut(h2, PAGE_ID, "");
 hashPut(h2, PAGE_NAME, "");
+hashPut(h2, UID, "2143549739");
 let s1 = string.$new("21407387");
 let s2 = string.$new();
-let s3 = string.$new('r_31');
+let s3 = string.$new('r_106');
 
 
 rpc.exports = {

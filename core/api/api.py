@@ -1,6 +1,9 @@
+import asyncio
 import json
 import os
 import time
+from urllib.parse import quote_plus, quote
+
 from aiohttp import TCPConnector
 from loguru import logger
 from core.frida.xianyu import XianYu
@@ -27,16 +30,16 @@ class Api:
         self.xian_yu = XianYu(js_path)
         self.headers = {
             "Content-Type": "application/x-www-form-urlencoded",
-            "User-Agent": "MTOPSDK%2F3.1.1.7+%28Android%3B12%3BXiaomi%3BRedmi+K30+Pro+Zoom+Edition%29",
+            "User-Agent": quote("MTOPSDK%2F3.1.1.7+%28Android%3B12%3BXiaomi%3BRedmi+K30+Pro+Zoom+Edition%29"),
             "x-pv": '6.3',
             # TODO 登录后获取
             "x-sid": '14da454c9c1d9e0ca034d26c95e8dbd3',
             "x-bx-version": '6.5.88',
-            "x-ttid": '231200@fleamarket_android_7.8.40',
+            "x-ttid": quote('231200@fleamarket_android_7.8.40'),
             "x-app-ver": '7.8.40',
-            "x-utdid": random_str(24),
+            "x-utdid": quote(random_str(24)),
             "x-appkey": "21407387",
-            "x-devid": random_str(44),
+            "x-devid": quote(random_str(44)),
             "x-features": "27"
         }
         self.proxy = None
@@ -51,9 +54,9 @@ class Api:
         sign = self.xian_yu.get_sign(data, self.headers, t)
         self.headers.update({
             "x-t": t,
-            "x-mini-wua": sign.get('x-mini-wua'),
-            "x-sgext": sign.get('x-sgext'),
-            "x-sign": sign.get('x-sign'),
+            "x-mini-wua": quote(sign.get('x-mini-wua')),
+            "x-sgext": quote(sign.get('x-sgext')),
+            "x-sign": quote(sign.get('x-sign')),
         })
 
     async def search(self, keyword):
@@ -86,23 +89,31 @@ class Api:
             'suggestBucketNum': 33
         }
         data = json.dumps(data)
+        # 去除空格、换行
+        data = data.replace(" ", "").replace("\n", "")
+        data = 'data=' + quote(data)
         self.update_headers(data)
-        data = {
-            'data': data,
-        }
-        # logger.info(f"请求参数: {data}")
+        logger.info(f"请求参数: {data}")
         # logger.info(f"请求头: {self.headers}")
-        async with aiohttp.ClientSession(
-                connector=TCPConnector(ssl=False),
-                connector_owner=False,
-        ) as session:
-            async with session.post(self.search_url, headers=self.headers, data=data, proxy=self.proxy) as resp:
-                resp = await resp.json()
-                logger.info(f"search请求完成")
-                # logger.info(f"search请求结果: {resp}")
-                result = self.parser_search_result(resp)
-                logger.info(f"search解析结果: {result}")
-                return result
+        # async with aiohttp.ClientSession(
+        #         connector=TCPConnector(ssl=False),
+        #         connector_owner=False,
+        # ) as session:
+        #     async with session.post(self.search_url, headers=self.headers, data=data, proxy=self.proxy) as resp:
+        #         resp = await resp.json()
+        #         logger.info(f"search请求完成")
+        #         # logger.info(f"search请求结果: {resp}")
+        #         result = self.parser_search_result(resp)
+        #         logger.info(f"search解析结果: {result}")
+        #         return result
+
+        async with aiohttp.request('POST', self.search_url, headers=self.headers, data=data, proxy=self.proxy) as resp:
+            resp = await resp.json()
+            logger.info(f"search请求完成")
+            # logger.info(f"search请求结果: {resp}")
+            result = self.parser_search_result(resp)
+            logger.info(f"search解析结果: {result}")
+            return result
 
     async def get_proxy(self):
         """https://www.hailiangip.com/"""
