@@ -111,4 +111,4 @@ def random_str(random_length=8):
 
 def test_api():
     api = Api()
-    asyncio.run(api.search("手机"))
+    asyncio.run(api.search("dell r730"))
