@@ -163,6 +163,9 @@ class Api:
     @staticmethod
     def parser_search_result(response):
         try:
+            if not response.get('data'):
+                logger.error(f"search请求结果: {response}")
+                return []
             res = response.get("data").get("resultList")
             result = []
             for item in res:
