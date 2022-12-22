@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 import time
@@ -6,6 +7,7 @@ from urllib.parse import quote_plus, quote
 
 import requests
 
+from core.api.api import Api
 from core.frida.xianyu import XianYu
 
 xian_yu = XianYu(os.path.join(os.path.dirname(__file__), "../core/js/rpc.js"))
@@ -66,10 +68,17 @@ def test_sign():
     }
 
     update_headers(headers, urllib.parse.urlencode(data))
+    proxies = {
+        'http': 'http://127.0.0.1:8080',
+        'https': 'http://127.0.0.1:8080',
+    }
+
     response = requests.post(
         'https://g-acs.m.goofish.com/gw/mtop.taobao.idlemtopsearch.search/1.0/',
         headers=headers,
         data=data,
+        proxies=proxies,
+        verify=False
     )
     print(response.text)
 
@@ -100,5 +109,6 @@ def random_str(random_length=8):
     return ''.join(str_list)
 
 
-if __name__ == '__main__':
-    test_sign()
+def test_api():
+    api = Api()
+    asyncio.run(api.search("手机"))

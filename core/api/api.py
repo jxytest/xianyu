@@ -124,8 +124,10 @@ class Api:
         data = json.dumps(data)
         # 去除空格、换行
         data = data.replace(" ", "").replace("\n", "")
-        data = 'data=' + quote(data)
         self.update_headers(data)
+        data = {
+            'data': data
+        }
         # logger.info(f"请求参数: {data}")
         # logger.info(f"请求头: {self.headers}")
         # async with aiohttp.ClientSession(

@@ -33,8 +33,23 @@ class XianYu:
         :param t: 时间戳
         :return:
         """
-        # data = quote(data)  # 对请求参数进行编码
-        self.script.exports.getSign(data, json.dumps(headers), t)
+        sign_params = {
+            'deviceId': headers['x-devid'],
+            'appKey': headers['x-appkey'],
+            'x-features': headers['x-features'],
+            'api': 'mtop.taobao.idlemtopsearch.search',
+            'v': '1.0',
+            'utdid': headers['x-utdid'],
+            'sid': headers['x-sid'],
+            'ttid': headers['x-ttid'],
+            'extdata': headers['x-extdata'],
+            'uid': headers['x-uid'],
+            'data': data,
+            'lat': '0',
+            'lng': '0',
+            't': t
+        }
+        self.script.exports.getSign(json.dumps(sign_params))
         return self.sign
 
     def on_message(self, message, data):

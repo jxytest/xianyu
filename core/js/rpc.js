@@ -1,18 +1,3 @@
-// 定义需要重复使用的字符串
-const DATA = 'data';
-const DEVICE_ID = 'deviceId';
-const X_FEATURES = 'x-features';
-const APP_KEY = 'appKey';
-const API = 'api';
-const LAT = 'lat';
-const LNG = 'lng';
-const UTDID = 'utdid';
-const SID = 'sid';  // 登录后获取
-const EXTDATA = 'extdata';
-const TTID = 'ttid';
-const UID = 'uid';
-const T = 't';
-const V = 'v';
 const PAGE_ID = 'pageId';
 const PAGE_NAME = 'pageName';
 // 定义 HashMap 对象和 String 对象
@@ -27,11 +12,6 @@ function hashPut(hashMap, key, value) {
 // 创建 h1 和 h2 两个 HashMap 对象
 let h1 = hashMap.$new();
 let h2 = hashMap.$new();
-hashPut(h1, X_FEATURES, "27");
-hashPut(h1, API, "mtop.taobao.idlemtopsearch.search");
-hashPut(h1, LAT, "0");
-hashPut(h1, LNG, "0");
-hashPut(h1, V, "1.0");
 hashPut(h2, PAGE_ID, "");
 hashPut(h2, PAGE_NAME, "");
 
@@ -41,28 +21,17 @@ let s3 = string.$new('r_106');
 
 
 rpc.exports = {
-    getsign: function(data, headers, t) {
+    getsign: function(sign_params) {
         Java.perform(function() {
             console.log("get_sign");
-            console.log(s3);
-            // 每次调用，更新data
-            hashPut(h1, DATA, data);
-            // var t = Math.floor(new Date().getTime() / 1000).toString();
-            // 每次调用 getsign 函数时，都会更新 t 的值
-            hashPut(h1, T, t);
-            // 解析headers
-            let headers_obj = JSON.parse(headers);
-            hashPut(h1, UTDID, headers_obj['x-utdid']);
-            hashPut(h1, SID, headers_obj['x-sid']);
-            hashPut(h1, UID, headers_obj['x-uid']);
-            hashPut(h1, DEVICE_ID, headers_obj['x-devid']);
-            hashPut(h1, EXTDATA, headers_obj['x-extdata']);
-            hashPut(h1, TTID, headers_obj['x-ttid']);
-            hashPut(h1, APP_KEY, headers_obj['x-appkey']);
-
-            let s1 = string.$new(headers_obj['x-appkey']);
-
-            console.log("===================================");
+            // 解析sign_params
+            let headers_obj = JSON.parse(sign_params);
+            // 遍历json对象
+            for (let key in headers_obj) {
+                console.log(key + " : " + headers_obj[key]);
+                hashPut(h1, key, headers_obj[key]);
+            }
+            let s1 = string.$new(headers_obj['appKey']);
             // 调用 com.taobao.wireless.security.sdk.SecurityGuardManagerImpl.getStaticDataSign 方法
             Java.choose("mtopsdk.security.InnerSignImpl", {
                 onMatch: function (instance) {
