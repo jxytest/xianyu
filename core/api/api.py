@@ -74,10 +74,10 @@ class Api:
             # 'Accept-Encoding': 'gzip',
             'Connection': 'Keep-Alive',
         }
-        self.proxy = 'http://127.0.0.1:8080'
+        self.proxy = None
         # 不能使用代理
         # 更新一次代理
-        asyncio.run(self.get_proxy())
+        # asyncio.run(self.get_proxy())
         # 每隔5分钟更新一次代理
         # threading.Timer(60 * 5, lambda: asyncio.run(self.get_proxy())).start()
 
