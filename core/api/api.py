@@ -2,8 +2,9 @@ import asyncio
 import json
 import os
 import time
-from urllib.parse import quote_plus, quote
+from urllib.parse import quote_plus, quote, unquote_plus
 
+import httpx
 from aiohttp import TCPConnector
 from loguru import logger
 from core.frida.xianyu import XianYu
@@ -43,8 +44,7 @@ class Api:
         #     "x-features": "27"
         # }
         self.headers = {
-            'umid': 'B94BhVxLPIjTTAKFMw8u0M5OFG+AuwhE',
-            'x-sid': '14da454c9c1d9e0ca034d26c95e8dbd3',
+            'x-sid': '25c20e667ae6213f466d6dec58c592e0',
             'x-uid': '2143549739',
             'x-nettype': 'WIFI',
             'x-pv': '6.3',
@@ -74,10 +74,10 @@ class Api:
             # 'Accept-Encoding': 'gzip',
             'Connection': 'Keep-Alive',
         }
-        self.proxy = None
+        self.proxy = 'http://127.0.0.1:8080'
         # 不能使用代理
         # 更新一次代理
-        # asyncio.run(self.get_proxy())
+        asyncio.run(self.get_proxy())
         # 每隔5分钟更新一次代理
         # threading.Timer(60 * 5, lambda: asyncio.run(self.get_proxy())).start()
 
@@ -86,10 +86,11 @@ class Api:
         sign = self.xian_yu.get_sign(data, self.headers, t)
         self.headers.update({
             "x-t": t,
-            "x-mini-wua": quote(sign.get('x-mini-wua')),
-            "x-sgext": quote(sign.get('x-sgext')),
-            "x-sign": quote(sign.get('x-sign')),
-            "x-mut": quote(sign.get('x-umt')),
+            "x-mini-wua":sign.get('x-mini-wua'),
+            "x-sgext": sign.get('x-sgext'),
+            "x-sign": sign.get('x-sign'),
+            "x-umt": sign.get('x-umt'),
+            "umid": sign.get('x-umt'),
         })
 
     async def search(self, keyword):
@@ -142,8 +143,17 @@ class Api:
         #         logger.info(f"search解析结果: {result}")
         #         return result
 
-        async with aiohttp.request('POST', self.search_url, headers=self.headers, data=data) as resp:
-            resp = await resp.json()
+        # async with aiohttp.request('POST', self.search_url, headers=self.headers, data=data, proxy=self.proxy) as resp:
+        #     resp = await resp.json()
+        #     logger.info(f"search请求完成")
+        #     # logger.info(f"search请求结果: {resp}")
+        #     result = self.parser_search_result(resp)
+        #     logger.info(f"search解析结果: {result}")
+        #     return result
+        # 改用httpx
+        async with httpx.AsyncClient(proxies={'http:': self.proxy, 'https:': self.proxy}, verify=False) as client:
+            resp = await client.post(self.search_url, headers=self.headers, data=data)
+            resp = resp.json()
             logger.info(f"search请求完成")
             # logger.info(f"search请求结果: {resp}")
             result = self.parser_search_result(resp)

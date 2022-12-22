@@ -36,7 +36,7 @@ rpc.exports = {
             Java.choose("mtopsdk.security.InnerSignImpl", {
                 onMatch: function (instance) {
                     console.log("Found instance: " + instance);
-                    var result = instance.getUnifiedSign(h1, h2, s1, s2, true, s3);
+                    var result = instance.getUnifiedSign(h1, h2, s1, s2, false, s3);
                     console.log(result);
                     send({ "sign": result.toString()});
                     // 必须返回stop，否则会遍历所有的实例
