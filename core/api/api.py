@@ -29,7 +29,7 @@ class Api:
         self.xian_yu = XianYu(js_path)
         self.headers = {
             # 登录后获取。没有这个字段，则搜出的结果始终是7小时前的
-            'x-sid': '25c20e667ae6213f466d6dec58c592e0',
+            'x-sid': '2d1981fda8edbf5cb4410f7e37b860d0',
             'x-uid': '2143549739',
 
             'x-nettype': 'WIFI',

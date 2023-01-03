@@ -39,8 +39,8 @@ async def getGoodsList(q: str = Query(default=None, min_length=2, max_length=20)
             result = json.loads(result.decode('unicode-escape'))
             if blacklist.filter(result):
                 continue
-            if not whitelist.filter(result):
-                continue
+            # if not whitelist.filter(result):
+            #     continue
             if q and q not in result.get("title"):
                 continue
             result["index"] = index
