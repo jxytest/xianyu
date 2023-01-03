@@ -1,11 +1,9 @@
 import asyncio
 import json
 import os
+import threading
 import time
-from urllib.parse import quote_plus, quote, unquote_plus
-
-import httpx
-from aiohttp import TCPConnector
+from urllib.parse import quote
 from loguru import logger
 from core.frida.xianyu import XianYu
 import aiohttp
@@ -25,72 +23,53 @@ def random_str(random_length=8):
 
 
 class Api:
-    def __init__(self):
+    def __init__(self, use_proxy=False):
         self.search_url = "https://g-acs.m.goofish.com/gw/mtop.taobao.idlemtopsearch.search/1.0/"
         js_path = os.path.join(os.path.dirname(__file__), "../js/rpc.js")
         self.xian_yu = XianYu(js_path)
-        # self.headers = {
-        #     "Content-Type": "application/x-www-form-urlencoded",
-        #     "User-Agent": quote("MTOPSDK%2F3.1.1.7+%28Android%3B12%3BXiaomi%3BRedmi+K30+Pro+Zoom+Edition%29"),
-        #     "x-pv": '6.3',
-        #     # TODO 登录后获取
-        #     "x-sid": '14da454c9c1d9e0ca034d26c95e8dbd3',
-        #     "x-bx-version": '6.5.88',
-        #     "x-ttid": quote('231200@fleamarket_android_7.8.40'),
-        #     "x-app-ver": '7.8.40',
-        #     "x-utdid": quote(random_str(24)),
-        #     "x-appkey": "21407387",
-        #     "x-devid": quote(random_str(44)),
-        #     "x-features": "27"
-        # }
         self.headers = {
+            # 登录后获取。没有这个字段，则搜出的结果始终是7小时前的
             'x-sid': '25c20e667ae6213f466d6dec58c592e0',
             'x-uid': '2143549739',
+
             'x-nettype': 'WIFI',
             'x-pv': '6.3',
             'x-nq': 'WIFI',
-            'EagleEye-UserData': 'spm-cnt=a2170.8011571.0.0&spm-url=a2170.unknown.0.0',
             'first_open': '0',
             'x-features': '27',
             'x-app-conf-v': '0',
             'content-type': 'application/x-www-form-urlencoded;charset=UTF-8',
-            # 'Content-Length': '640',
-            'oaid': 'ef4d6747261738fd',
             'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-            # 'Cookie': 'unb=2143549739; munb=2143549739; _nk_=%5Cu5BDE%5Cu661F%5Cu6C89; cookie2=14da454c9c1d9e0ca034d26c95e8dbd3; csg=2e46b480; t=adc81779bfa70b35310aa7c0c8890a3d; _tb_token_=5eea7913e3353; sgcookie=W100EBE%2FgJyMO%2Fh1nUumc1mxY78wzpOFqK4Psj5J97MelFO0hi%2BbuuHHWzjposSC1jvyZimvx8vLCQcW932dGWnTFfoC4%2B8pCgxQ3IA1TXieYvc%3D',
             'x-bx-version': '6.5.88',
-            'f-refer': 'mtop',
             'x-extdata': 'openappkey=DEFAULT_AUTH',
-            'x-ttid': '1561625392549@fleamarket_android_7.8.40',    # TODO
+            'x-ttid': '1561625392549@fleamarket_android_7.8.40',
             'x-app-ver': '7.8.40',
-            'x-c-traceid': f'X/{random_str(22)}{int(time.time() * 1000)}0230112176',
             'x-location': '0%2C0',
-            'a-orange-q': 'appKey=21407387&appVersion=7.8.40&clientAppIndexVersion=1120221221105400982&clientVersionIndexVersion=0',
             'x-utdid': quote(random_str(24)),
             'x-appkey': '21407387',
             'x-devid': quote(random_str(44)),
             'user-agent': 'MTOPSDK/3.1.1.7 (Android;12;Xiaomi;Redmi K30 Pro Zoom Edition)',
-            'Host': 'g-acs.m.goofish.com',
             # 'Accept-Encoding': 'gzip',
             'Connection': 'Keep-Alive',
         }
         self.proxy = None
-        # 不能使用代理
-        # 更新一次代理
-        # asyncio.run(self.get_proxy())
-        # 每隔5分钟更新一次代理
-        # threading.Timer(60 * 5, lambda: asyncio.run(self.get_proxy())).start()
+        if use_proxy:
+            # 更新一次代理
+            asyncio.run(self.get_proxy())
+            # 每隔5分钟更新一次代理
+            threading.Timer(60 * 5, lambda: asyncio.run(self.get_proxy())).start()
 
     def update_headers(self, data: str):
         t = str(int(time.time()))
         sign = self.xian_yu.get_sign(data, self.headers, t)
         self.headers.update({
             "x-t": t,
-            "x-mini-wua":sign.get('x-mini-wua'),
+            "x-mini-wua": sign.get('x-mini-wua'),
             "x-sgext": sign.get('x-sgext'),
             "x-sign": sign.get('x-sign'),
             "x-umt": sign.get('x-umt'),
             "umid": sign.get('x-umt'),
+            'x-c-traceid': f'X/{random_str(22)}{t}0230112176',
         })
 
     async def search(self, keyword):
@@ -122,7 +101,7 @@ class Api:
             # 'suggestBucketNum': 37,
             'suggestBucketNum': 33
         }
-        data = json.dumps(data)
+        data = json.dumps(data, ensure_ascii=False)
         # 去除空格、换行
         data = data.replace(" ", "").replace("\n", "")
         self.update_headers(data)
@@ -143,22 +122,22 @@ class Api:
         #         logger.info(f"search解析结果: {result}")
         #         return result
 
-        # async with aiohttp.request('POST', self.search_url, headers=self.headers, data=data, proxy=self.proxy) as resp:
-        #     resp = await resp.json()
+        async with aiohttp.request('POST', self.search_url, headers=self.headers, data=data, proxy=self.proxy) as resp:
+            resp = await resp.json()
+            logger.info(f"search请求完成")
+            logger.info(f"search请求结果: {resp}")
+            result = self.parser_search_result(resp)
+            logger.info(f"search解析结果: {result}")
+            return result
+        # 改用httpx
+        # async with httpx.AsyncClient(proxies={'http:': self.proxy, 'https:': self.proxy}, verify=False) as client:
+        #     resp = await client.post(self.search_url, headers=self.headers, data=data)
+        #     resp = resp.json()
         #     logger.info(f"search请求完成")
         #     # logger.info(f"search请求结果: {resp}")
         #     result = self.parser_search_result(resp)
         #     logger.info(f"search解析结果: {result}")
         #     return result
-        # 改用httpx
-        async with httpx.AsyncClient(proxies={'http:': self.proxy, 'https:': self.proxy}, verify=False) as client:
-            resp = await client.post(self.search_url, headers=self.headers, data=data)
-            resp = resp.json()
-            logger.info(f"search请求完成")
-            # logger.info(f"search请求结果: {resp}")
-            result = self.parser_search_result(resp)
-            logger.info(f"search解析结果: {result}")
-            return result
 
     async def get_proxy(self):
         """https://www.hailiangip.com/"""

@@ -6,6 +6,9 @@ const string = Java.use('java.lang.String');
 
 
 function hashPut(hashMap, key, value) {
+    if (value === null) {
+        return;
+    }
     hashMap.put(string.$new(key), string.$new(value));
 }
 

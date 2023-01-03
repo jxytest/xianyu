@@ -1,8 +1,21 @@
 import json
-from urllib.parse import quote
+from urllib.parse import quote_plus
 
 from loguru import logger
 import frida
+
+
+# 生成随机字符串
+def random_str(random_length=8):
+    """
+    生成一个指定长度的随机字符串，其中
+    string.digits=0123456789
+    string.ascii_letters=abcdefghigklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ
+    """
+    import random
+    import string
+    str_list = [random.choice(string.digits + string.ascii_letters) for i in range(random_length)]
+    return ''.join(str_list)
 
 
 class XianYu:
@@ -40,10 +53,10 @@ class XianYu:
             'api': 'mtop.taobao.idlemtopsearch.search',
             'v': '1.0',
             'utdid': headers['x-utdid'],
-            'sid': headers['x-sid'],
+            'sid': headers.get('x-sid'),
             'ttid': headers['x-ttid'],
             'extdata': headers['x-extdata'],
-            'uid': headers['x-uid'],
+            'uid': headers.get('x-uid'),
             'data': data,
             'lat': '0',
             'lng': '0',
@@ -61,5 +74,7 @@ class XianYu:
         """
         sign = message.get("payload").get("sign")
         self.sign = dict([x.split('=', 1) for x in sign[1:-1].split(", ")])
+        for k, v in self.sign.items():
+            self.sign[k] = quote_plus(v)
         logger.info(self.sign)
 
