@@ -25,7 +25,7 @@ async def xy_task(keywords):
             data = await api.search(keyword)
             # 存入redis
             for item in data:
-                if not await redis.exists(item.get("itemId")) and 4000 > float(item.get("price")) > 1000 \
+                if not await redis.exists(item.get("itemId")) and 4000 > float(item.get("price")) > 700 \
                         and "回收" not in item.get("title") and "求购" not in item.get("title") \
                         and time.mktime(time.strptime(item.get("publish_time"), "%Y-%m-%d %H:%M:%S")) > \
                         time.time() - 3600 * 24 * 3:
@@ -36,7 +36,7 @@ async def xy_task(keywords):
                     message = f"### {item.get('title')}\n" \
                               f"> 价格：{item.get('price')}\n" \
                               f"> 发布时间：{item.get('publish_time')}\n" \
-                              f"> 商品链接：https://item.taobao.com/item.htm?id={item.get('itemId')}\n" \
+                              f"> 商品链接：https://h5.m.goofish.com/item?id={item.get('itemId')}&\n" \
                               f"> ![商品图片]({item.get('pic_url')})\n"
 
                     await ding_push(message)
